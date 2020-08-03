@@ -386,6 +386,39 @@ struct slab_cache;
 API_EXPORT struct slab_cache *
 cord_slab_cache(void);
 
+/**
+ * How much memory is used by the fiber region.
+ */
+API_EXPORT size_t
+fiber_region_used(void);
+
+/* XXX */
+API_EXPORT void *
+fiber_region_alloc(size_t size);
+
+/* XXX */
+API_EXPORT void *
+fiber_region_aligned_alloc(size_t size, size_t alignment);
+
+/* XXX */
+#define fiber_region_alloc_object(T, size) ({					\
+	*(size) = sizeof(T);							\
+	(T *)fiber_region_aligned_alloc(sizeof(T), alignof(T));			\
+})
+
+/* XXX */
+#define fiber_region_alloc_array(T, count, size) ({				\
+	int _tmp_ = sizeof(T) * (count);					\
+	*(size) = _tmp_;							\
+	(T *)fiber_region_aligned_alloc(_tmp_, alignof(T));			\
+})
+
+/**
+ * Truncate the fiber region to the given size.
+ */
+void
+fiber_region_truncate(size_t size);
+
 /** \endcond public */
 
 /**
