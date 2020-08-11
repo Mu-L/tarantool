@@ -546,24 +546,25 @@ sql_generate_row_delete(struct Parse *parse, struct space *space,
 }
 
 int
-sql_generate_index_key(struct Parse *parse, struct index *index, int cursor,
-		       int reg_out, struct index *prev, int reg_prev)
+sql_generate_index_key(struct Parse *parse, struct index_def *idx_def,
+		       int cursor, int reg_out, struct index *prev,
+		       int reg_prev, int reg_eph)
 {
 	struct Vdbe *v = parse->pVdbe;
-	int col_cnt = index->def->key_def->part_count;
-	int reg_base = sqlGetTempRange(parse, col_cnt);
+	int col_cnt = idx_def->key_def->part_count;
+	int reg_base = sqlGetTempRange(parse, col_cnt + 1);
 	if (prev != NULL && reg_base != reg_prev)
 		prev = NULL;
 	for (int j = 0; j < col_cnt; j++) {
 		if (prev != NULL && prev->def->key_def->parts[j].fieldno ==
-				    index->def->key_def->parts[j].fieldno) {
+				    idx_def->key_def->parts[j].fieldno) {
 			/*
 			 * This column was already computed by the
 			 * previous index.
 			 */
 			continue;
 		}
-		uint32_t tabl_col = index->def->key_def->parts[j].fieldno;
+		uint32_t tabl_col = idx_def->key_def->parts[j].fieldno;
 		sqlVdbeAddOp3(v, OP_Column, cursor, tabl_col, reg_base + j);
 		/*
 		 * If the column type is NUMBER but the number
@@ -578,8 +579,9 @@ sql_generate_index_key(struct Parse *parse, struct index *index, int cursor,
 		 */
 		sqlVdbeDeletePriorOpcode(v, OP_Realify);
 	}
+	sqlVdbeAddOp2(v, OP_NextIdEphemeral, reg_eph, reg_base + col_cnt);
 	if (reg_out != 0)
-		sqlVdbeAddOp3(v, OP_MakeRecord, reg_base, col_cnt, reg_out);
+		sqlVdbeAddOp3(v, OP_MakeRecord, reg_base, col_cnt + 1, reg_out);
 
 	sqlReleaseTempRange(parse, reg_base, col_cnt);
 	return reg_base;
