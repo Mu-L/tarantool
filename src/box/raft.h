@@ -70,9 +70,13 @@ raft_is_enabled(void)
 void
 raft_process_recovery(const struct raft_request *req);
 
-/** Process a raft status message coming from the network. */
+/**
+ * Process a raft status message coming from the network.
+ * @param req Raft request.
+ * @param source Instance ID of the message sender.
+ */
 void
-raft_process_msg(const struct raft_request *req);
+raft_process_msg(const struct raft_request *req, uint32_t source);
 
 /** Configure whether Raft is enabled. */
 void
