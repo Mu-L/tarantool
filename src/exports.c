@@ -89,11 +89,11 @@
  */
 
 /**
- * ICU library appends version suffix to exported symbols
- * by using define U_ICU_ENTRY_POINT_RENAME from unicode/uvernum.h
+ * ICU library appends version suffix to exported symbols.
+ * At <unicode/urename.h> symbols mapped usign to symbols
+ * with version by defines
  */
-#include <unicode/uvernum.h>
-#define EXPORT_ICU(symbol) EXPORT(U_ICU_ENTRY_POINT_RENAME(symbol))
+#include <unicode/urename.h>
 
 /**
  * Symbol is just an address. No need to know its definition or
