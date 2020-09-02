@@ -89,6 +89,13 @@
  */
 
 /**
+ * ICU library appends version suffix to exported symbols
+ * by using define U_ICU_ENTRY_POINT_RENAME from unicode/uvernum.h
+ */
+#include <unicode/uvernum.h>
+#define EXPORT_ICU(symbol) EXPORT(U_ICU_ENTRY_POINT_RENAME(symbol))
+
+/**
  * Symbol is just an address. No need to know its definition or
  * even type to get that address. Even an integer global variable
  * can be referenced as extern void(*)(void).
