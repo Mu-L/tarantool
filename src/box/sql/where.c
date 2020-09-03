@@ -909,7 +909,7 @@ constructAutomaticIndex(Parse * pParse,			/* The parsing context */
 	// struct sql_key_info *pk_info;
 	// pk_info = sql_key_info_new_from_key_def(pParse->db,
 	// 					idx_def->key_def);
-	sqlVdbeAddOp2(v, OP_OpenTEphemeral, reg_eph, nKeyCol);
+	sqlVdbeAddOp2(v, OP_OpenTEphemeral, reg_eph, nKeyCol + 1);
 		      // nKeyCol, 0, (char *)pk_info, P4_KEYINFO);
 	sqlVdbeAddOp3(v, OP_IteratorOpen, pLevel->iIdxCur, 0, reg_eph);
 	VdbeComment((v, "for %s", space->def->name));
@@ -931,7 +931,7 @@ constructAutomaticIndex(Parse * pParse,			/* The parsing context */
 	}
 	regRecord = ++pParse->nMem;
 	regBase = sql_generate_index_key(pParse, idx_def, pLevel->iTabCur,
-					 regRecord, NULL, 0);
+					 regRecord, NULL, 0, reg_eph);
 	sqlVdbeAddOp2(v, OP_IdxInsert, regRecord, reg_eph);
 	if (pTabItem->fg.viaCoroutine) {
 		sqlVdbeChangeP2(v, addrCounter, regBase + n);

@@ -3330,7 +3330,7 @@ sql_generate_row_delete(struct Parse *parse, struct space *space,
 int
 sql_generate_index_key(struct Parse *parse, struct index_def *idx_def,
 		       int cursor, int reg_out, struct index *prev,
-		       int reg_prev);
+		       int reg_prev, int reg_eph);
 
 /**
  * Generate code to do constraint checks prior to an INSERT or
