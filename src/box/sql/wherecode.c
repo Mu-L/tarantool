@@ -219,12 +219,12 @@ sqlWhereExplainOneScan(Parse * pParse,	/* Parse context */
 
 			assert(!(flags & WHERE_AUTO_INDEX)
 			       || (flags & WHERE_IDX_ONLY));
-			if (idx_def->iid == 0) {
+			if (flags & WHERE_AUTO_INDEX) {
+				zFmt = "AUTOMATIC COVERING INDEX";
+			} else if (idx_def->iid == 0) {
 				if (isSearch) {
 					zFmt = "PRIMARY KEY";
 				}
-			} else if (flags & WHERE_AUTO_INDEX) {
-				zFmt = "AUTOMATIC COVERING INDEX";
 			} else if (flags & WHERE_IDX_ONLY) {
 				zFmt = "COVERING INDEX %s";
 			} else {
