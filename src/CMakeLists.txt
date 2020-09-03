@@ -266,6 +266,10 @@ add_executable(
     ${LIBUTIL_FREEBSD_SRC}/flopen.c
     ${LIBUTIL_FREEBSD_SRC}/pidfile.c)
 
+if (BUILD_STATIC)
+    target_compile_definitions(tarantool PUBLIC -DBUILD_STATIC)
+endif()
+
 add_dependencies(tarantool build_bundled_libs)
 target_link_libraries(tarantool box ${common_libraries})
 

@@ -93,7 +93,12 @@
  * At <unicode/urename.h> symbols mapped usign to symbols
  * with version by defines
  */
+#ifdef BUILD_STATIC
 #include <unicode/urename.h>
+	#define EXPORT_ICU(symbol) EXPORT(symbol)
+#else
+	#define EXPORT_ICU(symbol)
+#endif
 
 /**
  * Symbol is just an address. No need to know its definition or
