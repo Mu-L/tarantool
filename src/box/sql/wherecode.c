@@ -1047,7 +1047,7 @@ sqlWhereCodeOneLoopStart(WhereInfo * pWInfo,	/* Complete information about the W
 			startEq = 0;
 			start_constraints = 1;
 		}
-		struct index_def *idx_pk = space->index[0]->def;
+		struct index_def *idx_pk = space->def->opts.is_view ? idx_def : space->index[0]->def;
 		uint32_t pk_part_count = idx_pk->key_def->part_count;
 		/*
 		 * Tarantool's iterator over integer fields doesn't
