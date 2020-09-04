@@ -189,3 +189,23 @@ field_type_by_name(const char *name, size_t len)
 		return FIELD_TYPE_ANY;
 	return field_type_MAX;
 }
+
+bool
+field_type_is_valid(enum field_type type)
+{
+	return type < field_type_MAX;
+}
+
+bool
+field_type_has_comparator(enum field_type type)
+{
+	return type <= FIELD_TYPE_ANY && type >= FIELD_TYPE_ARRAY;
+}
+
+const char *
+field_type_name(enum field_type type)
+{
+	if (! field_type_is_valid(type))
+		return NULL;
+	return field_type_strs[type];
+}

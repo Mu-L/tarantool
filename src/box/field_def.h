@@ -48,6 +48,8 @@ extern "C" {
  * Possible field data types. Can't use STRS/ENUM macros for them,
  * since there is a mismatch between enum name (STRING) and type
  * name literal ("STR"). STR is already used as Objective C type.
+ *
+ * XXX: Note re using in modules.
  */
 enum field_type {
 	FIELD_TYPE_ANY = 0,
@@ -103,11 +105,50 @@ extern const char *on_conflict_action_strs[];
 bool
 field_type1_contains_type2(enum field_type type1, enum field_type type2);
 
+/** \cond public */
+
+// XXX: box_field_type_*()?
+
 /**
- * Get field type by name
+ * Get field type by name.
+ *
+ * Returns field_type_MAX for an unknown field type name. External
+ * modules should use field_type_is_valid() to verify whether a
+ * field type is known on given tarantool version.
  */
 enum field_type
 field_type_by_name(const char *name, size_t len);
+
+/**
+ * Whether given field type is valid.
+ *
+ * All known field types are valid
+ */
+bool
+field_type_is_valid(enum field_type type);
+
+/**
+ * Whether given field type may be used to compare tuple / key
+ * fields.
+ *
+ * All field types except array, map and any (just like in memtx
+ * TREE indices).
+ *
+ * Assumes <type> being valid (see <field_type_is_valid>).
+ */
+bool
+field_type_has_comparator(enum field_type type);
+
+/**
+ * Get name of a field type.
+ *
+ * Returns NULL for an unknown field type (see
+ * <field_type_is_valid>).
+ */
+const char *
+field_type_name(enum field_type type);
+
+/** \endcond public */
 
 /* MsgPack type names */
 extern const char *mp_type_strs[];
