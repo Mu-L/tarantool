@@ -149,3 +149,29 @@ error_vformat_msg(struct error *e, const char *format, va_list ap)
 	vsnprintf(e->errmsg, sizeof(e->errmsg), format, ap);
 }
 
+void
+box_diag_set(int box_error_class, ...)
+{
+	va_list ap;
+	va_start(ap, box_error_class);
+
+	switch (box_error_class) {
+	case IllegalParams: {
+		const char *format = va_arg(ap, const char *);
+		diag_set(IllegalParamsV, format, ap);
+		break;
+	}
+	case OutOfMemory: {
+		size_t amount = va_arg(ap, size_t);
+		const char *allocator = va_arg(ap, const char *);
+		const char *object = va_arg(ap, const char *);
+		diag_set(OutOfMemory, amount, allocator, object);
+		break;
+	}
+	default:
+		/* XXX: What to do here? */
+		unreachable();
+	}
+
+	va_end(ap);
+}

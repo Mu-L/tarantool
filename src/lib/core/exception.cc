@@ -344,6 +344,16 @@ BuildIllegalParams(const char *file, unsigned line, const char *format, ...)
 }
 
 struct error *
+BuildIllegalParamsV(const char *file, unsigned line, const char *format,
+		    va_list ap)
+{
+	BuildAlloc(IllegalParams);
+	IllegalParams *e =  new (p) IllegalParams(file, line, "");
+	error_vformat_msg(e, format, ap);
+	return e;
+}
+
+struct error *
 BuildSystemError(const char *file, unsigned line, const char *format, ...)
 {
 	BuildAlloc(SystemError);

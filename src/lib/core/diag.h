@@ -328,6 +328,9 @@ BuildLuajitError(const char *file, unsigned line, const char *msg);
 struct error *
 BuildIllegalParams(const char *file, unsigned line, const char *format, ...);
 struct error *
+BuildIllegalParamsV(const char *file, unsigned line, const char *format,
+		    va_list ap);
+struct error *
 BuildSystemError(const char *file, unsigned line, const char *format, ...);
 struct error *
 BuildCollationError(const char *file, unsigned line, const char *format, ...);
@@ -364,6 +367,35 @@ BuildSocketError(const char *file, unsigned line, const char *socketname,
 	diag_add_error(diag_get(), e);					\
 	errno = save_errno;						\
 } while (0)
+
+#if !defined(__cplusplus)
+/** \cond public */
+
+/**
+ * XXX: write something about backward compatibility
+ * write how to expand the structure
+ *
+ * Names are the same as class names in C++.
+ */
+enum {
+	IllegalParams,
+	OutOfMemory,
+};
+
+/**
+ * XXX
+ *
+ * XXX: What to do for unknown error?
+ *
+ * XXX: naming
+ *
+ * XXX: box error is ClientError...
+ */
+void
+box_diag_set(int box_error_class, ...);
+
+/** \endcond public */
+#endif /* !defined(__cplusplus) */
 
 #if defined(__cplusplus)
 } /* extern "C" */
