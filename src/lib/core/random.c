@@ -97,3 +97,11 @@ rand:
 	while (generated < size)
 		buf[generated++] = rand();
 }
+
+int64_t
+random_in_range(int64_t min, int64_t max)
+{
+	assert(max >= min);
+	double drand = drand48();
+	return (int64_t)(drand * max + (1 - drand) * min);
+}

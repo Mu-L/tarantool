@@ -32,6 +32,7 @@
  */
 
 #include <stddef.h>
+#include <stdint.h>
 
 #if defined(__cplusplus)
 extern "C" {
@@ -44,6 +45,17 @@ random_free(void);
 
 void
 random_bytes(char *buf, size_t size);
+
+/**
+ * Return a random int64_t number within given boundaries.
+ *
+ * Instead of blindly calculating a modulo, this function uses
+ * uniformly distributed over the interval [0.0 , 1.0) drand48()
+ * to provide number in given boundaries while preserving uniform
+ * distribution and avoiding overflow.
+ */
+int64_t
+random_in_range(int64_t min, int64_t max);
 
 #if defined(__cplusplus)
 }
