@@ -386,6 +386,14 @@ struct slab_cache;
 API_EXPORT struct slab_cache *
 cord_slab_cache(void);
 
+struct region;
+
+/**
+ * XXX
+ */
+API_EXPORT struct region *
+fiber_region(void);
+
 /**
  * How much memory is used by the fiber region.
  */

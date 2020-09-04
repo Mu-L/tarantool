@@ -1358,6 +1358,12 @@ fiber_top_disable(void)
 }
 #endif /* ENABLE_FIBER_TOP */
 
+struct region *
+fiber_region(void)
+{
+	return &fiber()->gc;
+}
+
 size_t
 fiber_region_used(void)
 {
