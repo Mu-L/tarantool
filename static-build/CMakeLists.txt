@@ -254,7 +254,13 @@ add_test(
 )
 
 add_test(
-    NAME test-run-static
-    COMMAND ./test-run.py --builddir ${TARANTOOL_BINARY_DIR}
-    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/test
+    NAME check-exports
+    COMMAND ${TARANTOOL_BINARY_DIR}/src/tarantool
+            ${CMAKE_CURRENT_SOURCE_DIR}/test/static-build/exports.test.lua
+)
+
+add_test(
+    NAME check-traceback
+    COMMAND ${TARANTOOL_BINARY_DIR}/src/tarantool
+            ${CMAKE_CURRENT_SOURCE_DIR}/test/static-build/traceback.test.lua
 )
