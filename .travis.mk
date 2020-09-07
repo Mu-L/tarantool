@@ -149,7 +149,8 @@ test_static_build: deps_debian_static
 	CMAKE_EXTRA_PARAMS=-DBUILD_STATIC=ON make -f .travis.mk test_debian_no_deps
 
 # New static build
-# builddir used in this target - is a default build path from cmake ExternalProject_Add()
+# builddir used in this target - is a default build path from cmake
+# ExternalProject_Add()
 test_static_build_cmake_linux:
 	cd static-build && cmake -DCMAKE_TARANTOOL_ARGS="-DCMAKE_BUILD_TYPE=RelWithDebInfo;-DENABLE_WERROR=ON" . && \
 	make -j && ctest -V
@@ -233,7 +234,8 @@ base_deps_osx:
 	brew install --force ${STATIC_OSX_PKGS} || brew upgrade ${STATIC_OSX_PKGS}
 	pip install --force-reinstall -r test-run/requirements.txt
 
-# builddir used in this target - is a default build path from cmake ExternalProject_Add()
+# builddir used in this target - is a default build path from cmake
+# ExternalProject_Add()
 test_static_build_cmake_osx: base_deps_osx
 	cd static-build && cmake -DCMAKE_TARANTOOL_ARGS="-DCMAKE_BUILD_TYPE=RelWithDebInfo;-DENABLE_WERROR=ON" . && \
 	make -j && ctest -V

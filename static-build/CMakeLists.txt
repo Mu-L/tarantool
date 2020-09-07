@@ -1,6 +1,11 @@
 cmake_minimum_required(VERSION 2.8)
 
-project(tarantool-env NONE)
+# Detect system compilers for further configuring dependencies to be
+# builded with these compilers. This is used to build tarantool and
+# it's dependencies by usign one compiler system (for example libicu
+# by default uses clang if it exists when others uses gcc/g++ on
+# linux machine).
+project(tarantool-static C CXX)
 
 include(ExternalProject)
 set(OPENSSL_VERSION 1.1.1f)
@@ -9,21 +14,6 @@ set(NCURSES_VERSION 6.2)
 set(READLINE_VERSION 8.0)
 set(UNWIND_VERSION 1.3-rc1)
 
-# Set compilers explicitly for further configuring dependencies with
-# these compilers. This gonna solve libicu building problem in case when
-# at dependency configure stage no compiler specified and clang compiler
-# exists on linux machine, libicu sources would be compiled with clang
-# while for other dependencies (including tarantool) gcc would be used.
-# This behaviour causes problem at tarantool linkage stage.
-if (APPLE)
-    find_program(C_COMPILER clang)
-    find_program(CXX_COMPILER clang++)
-else()
-    find_program(C_COMPILER gcc)
-    find_program(CXX_COMPILER g++)
-endif()
-set(CMAKE_C_COMPILER ${C_COMPILER})
-set(CMAKE_CXX_COMPILER ${CXX_COMPILER})
 
 # Install all libraries required by tarantool at current build dir
 
@@ -46,6 +36,14 @@ ExternalProject_Add(openssl
 #
 ExternalProject_Add(icu
     URL https://github.com/unicode-org/icu/releases/download/release-62-1/icu4c-62_1-src.tgz
+    # By default libicu is built by using clang/clang++ compiler (if it
+    # exists). Here is a link for detecting compilers at libicu configure
+    # script: https://github.com/unicode-org/icu/blob/7c7b8bd5702310b972f888299169bc3cc88bf0a6/icu4c/source/configure.ac#L135
+    # This will cause the problem on linux machine: tarantool is built
+    # with gcc/g++ and libicu is built with clang/clang++ (if it exists)
+    # so at linking stage `rellocation` errors will occur. To solve this,
+    # we can set CC/CXX to CMAKE_C_COMPILER/CMAKE_CXX_COMPILER variables
+    # manually which are detected above (by cmake `project()` command)
     CONFIGURE_COMMAND CC=${CMAKE_C_COMPILER}
         CXX=${CMAKE_CXX_COMPILER}
         <SOURCE_DIR>/source/configure
@@ -64,7 +62,6 @@ ExternalProject_Add(zlib
         <SOURCE_DIR>/configure
         --prefix=<INSTALL_DIR>
         --static
-    TEST_COMMAND ${CMAKE_MAKE_PROGRAM} check
 )
 
 #
@@ -105,7 +102,6 @@ ExternalProject_Add(readline
         <SOURCE_DIR>/configure
         --prefix=<INSTALL_DIR>
         --disable-shared
-    # STEP_TARGETS download
 )
 
 #
