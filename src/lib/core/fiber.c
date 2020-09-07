@@ -46,6 +46,8 @@
 #if ENABLE_FIBER_TOP
 #include <x86intrin.h> /* __rdtscp() */
 
+extern void lua_on_yield(void);
+
 static inline void
 clock_stat_add_delta(struct clock_stat *stat, uint64_t clock_delta)
 {
@@ -416,6 +418,10 @@ fiber_call(struct fiber *callee)
 	/** By convention, these triggers must not throw. */
 	if (! rlist_empty(&caller->on_yield))
 		trigger_run(&caller->on_yield, NULL);
+
+	if (cord_is_main())
+		lua_on_yield();
+
 	clock_set_on_csw(caller);
 	callee->caller = caller;
 	callee->flags |= FIBER_IS_READY;
@@ -645,6 +651,10 @@ fiber_yield(void)
 	/** By convention, these triggers must not throw. */
 	if (! rlist_empty(&caller->on_yield))
 		trigger_run(&caller->on_yield, NULL);
+
+	if (cord_is_main())
+		lua_on_yield();
+
 	clock_set_on_csw(caller);
 
 	assert(callee->flags & FIBER_IS_READY || callee == &cord->sched);

@@ -1308,3 +1308,9 @@ tarantool_lua_utils_init(struct lua_State *L)
 	luaT_newthread_ref = luaL_ref(L, LUA_REGISTRYINDEX);
 	return 0;
 }
+
+#include "lj_trace.h"
+void lua_on_yield(void)
+{
+	lj_trace_abort(G(tarantool_L));
+}
