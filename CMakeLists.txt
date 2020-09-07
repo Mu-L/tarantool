@@ -17,9 +17,11 @@ include(TestBigEndian)
 include(CheckFunctionExists)
 include(FindOptionalPackage)
 include(FindPackageMessage)
+include(ExternalProject)
 
 find_program(ECHO echo)
 find_program(CAT cat)
+find_program(BASH bash)
 find_program(GIT git)
 find_program(LD ld)
 find_program(CTAGS ctags)
@@ -160,6 +162,29 @@ add_custom_target(luacheck)
 add_custom_command(TARGET luacheck
     COMMAND ${LUACHECK} --codes --config "${PROJECT_SOURCE_DIR}/.luacheckrc" "${PROJECT_SOURCE_DIR}"
     COMMENT "Perform static analysis of Lua code"
+)
+
+#
+# Enable 'make jepsen' target.
+#
+
+set(JEPSEN_TESTS_SRC_DIR "${CMAKE_BINARY_DIR}/jepsen-tests-src")
+
+ExternalProject_Add(jepsen-repo
+  GIT_REPOSITORY    https://github.com/ligurio/jepsen.tarantool
+  GIT_TAG 	    master
+  GIT_SHALLOW       true
+  SOURCE_DIR        ${JEPSEN_TESTS_SRC_DIR}
+  CONFIGURE_COMMAND ""
+  BUILD_COMMAND     ""
+  INSTALL_COMMAND   ""
+  TEST_COMMAND      ""
+)
+
+add_custom_target(jepsen-tests)
+add_custom_command(TARGET jepsen-tests
+    COMMAND ${BASH} ${PROJECT_SOURCE_DIR}/tools/run-jepsen-tests.sh ${PROJECT_SOURCE_DIR}
+    COMMENT "Running Jepsen tests"
 )
 
 #
