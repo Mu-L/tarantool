@@ -8,6 +8,12 @@ TEST_RUN_EXTRA_PARAMS?=
 MAX_FILES?=65534
 MAX_PROC?=2500
 OOS_SRC_PATH="/source"
+BIN_DIR="/usr/local/bin"
+
+CLOJURE_URL="https://download.clojure.org/install/linux-install-1.10.1.561.sh"
+LEIN_URL="https://raw.githubusercontent.com/technomancy/leiningen/stable/bin/lein"
+TERRAFORM_NAME="terraform_0.13.1_linux_amd64.zip"
+TERRAFORM_URL="https://releases.hashicorp.com/terraform/0.13.1/"$(TERRAFORM_NAME)
 
 all: package
 
@@ -60,7 +66,7 @@ docker_%:
 # commit, so the build requires old dependencies to be installed.
 # See ce623a23416eb192ce70116fd14992e84e7ccbbe ('Enable GitLab CI
 # testing') for more information.
-deps_debian:
+deps_debian: $(BIN_DIR)/clojure $(BIN_DIR)/lein $(BIN_DIR)/terraform
 	apt-get update ${APT_EXTRA_FLAGS} && apt-get install -y -f \
 		build-essential cmake coreutils sed \
 		libreadline-dev libncurses5-dev libyaml-dev libssl-dev \
@@ -69,12 +75,30 @@ deps_debian:
 		python-msgpack python-yaml python-argparse python-six python-gevent \
 		lcov ruby clang llvm llvm-dev zlib1g-dev autoconf automake libtool
 
+deps_debian_jepsen:
+	apt-get update ${APT_EXTRA_FLAGS} && apt-get install -y -f \
+		openjdk-8-jre openjdk-8-jre-headless libjna-java gnuplot graphviz \
+		unzip openssh-client
+
 deps_buster_clang_8: deps_debian
 	echo "deb http://apt.llvm.org/buster/ llvm-toolchain-buster-8 main" > /etc/apt/sources.list.d/clang_8.list
 	echo "deb-src http://apt.llvm.org/buster/ llvm-toolchain-buster-8 main" >> /etc/apt/sources.list.d/clang_8.list
 	wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | apt-key add -
 	apt-get update
 	apt-get install -y clang-8 llvm-8-dev
+
+$(BIN_DIR)/clojure: deps_debian
+	curl $(CLOJURE_URL) | sudo bash
+
+$(BIN_DIR)/lein: deps_debian_jepsen
+	curl $(LEIN_URL) > $@
+	chmod a+x $@
+	$@ version
+
+$(BIN_DIR)/terraform: deps_debian_jepsen
+	curl -O $(TERRAFORM_URL)
+	unzip -o $(TERRAFORM_NAME) terraform -d $(dir $@)
+	rm -f $(TERRAFORM_NAME)
 
 # Release
 
@@ -232,3 +256,10 @@ test_freebsd_no_deps: build_freebsd
 	cd test && python2.7 test-run.py --force $(TEST_RUN_EXTRA_PARAMS)
 
 test_freebsd: deps_freebsd test_freebsd_no_deps
+
+# ###################
+# Jepsen testing
+# ###################
+
+test_jepsen: configure_debian deps_debian
+	make jepsen-tests

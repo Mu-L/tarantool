@@ -1,6 +1,7 @@
 stages:
   - static_analysis
   - test
+  - long_tests
   - perf
   - cleanup
 
@@ -209,6 +210,19 @@ freebsd_12_release:
   script:
     - ${GITLAB_MAKE} vms_start
     - ${GITLAB_MAKE} vms_test_freebsd
+
+jepsen:
+  <<: *docker_test_definition
+  script:
+    - ${GITLAB_MAKE} test_jepsen
+  stage: static_analysis
+  when: manual
+  tags:
+    - docker_test
+  artifacts:
+    paths:
+      - jepsen_results.zip
+    expire_in: 1 week
 
 # ####
 # Perf
