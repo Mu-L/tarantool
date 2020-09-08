@@ -8,19 +8,13 @@ ffi.cdef([[
 
 local test = tap.test('exports')
 
-
-local RTLD_DEFAULT
 -- See `man 3 dlsym`:
 -- RTLD_DEFAULT
---   Find  the  first occurrence of the desired symbol using the default
---   shared object search order.  The search will include global symbols
+--   Find the first occurrence of the desired symbol using the default
+--   shared object search order. The search will include global symbols
 --   in the executable and its dependencies, as well as symbols in shared
 --   objects that were dynamically loaded with the RTLD_GLOBAL flag.
-if jit.os == "OSX" then
-    RTLD_DEFAULT = ffi.cast("void *", -2LL)
-else
-    RTLD_DEFAULT = ffi.cast("void *", 0LL)
-end
+local RTLD_DEFAULT = ffi.cast("void *", jit.os == "OSX" and -2LL or 0LL)
 
 local function check_symbol(sym)
     test:ok(ffi.C.dlsym(RTLD_DEFAULT, sym) ~= nil, ('Symbol %q found'):format(sym))
