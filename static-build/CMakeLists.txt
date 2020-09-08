@@ -14,6 +14,24 @@ set(NCURSES_VERSION 6.2)
 set(READLINE_VERSION 8.0)
 set(UNWIND_VERSION 1.3-rc1)
 
+# Pass -isysroot=<SDK_PATH> option on Mac OS to a preprocessor and a C
+# compiler to find header files installed with an SDK.
+#
+# The idea is to set these (DEPENDENCY_*) variables to corresponding
+# environment variables at each depenency configure script.
+#
+# Note: Passing of CPPFLAGS / CFLAGS explicitly discards using of
+# corresponsing environment variables. So pass empty LDFLAGS to discard
+# using of corresponding environment variable. It is possible that a
+# linker flag assumes that some compilation flag is set. We don't pass
+# CFLAGS from environment, so we should not do it for LDFLAGS too.
+set(DEPENDENCY_CFLAGS "")
+set(DEPENDENCY_CPPFLAGS "")
+set(DEPENDENCY_LDFLAGS)
+if (APPLE)
+    set(DEPENDENCY_CFLAGS   "${CMAKE_C_SYSROOT_FLAG} ${CMAKE_OSX_SYSROOT}")
+    set(DEPENDENCY_CPPFLAGS "${CMAKE_C_SYSROOT_FLAG} ${CMAKE_OSX_SYSROOT}")
+endif()
 
 # Install all libraries required by tarantool at current build dir
 
@@ -22,9 +40,13 @@ set(UNWIND_VERSION 1.3-rc1)
 #
 ExternalProject_Add(openssl
     URL https://www.openssl.org/source/openssl-${OPENSSL_VERSION}.tar.gz
-    CONFIGURE_COMMAND CC=${CMAKE_C_COMPILER}
+    CONFIGURE_COMMAND <SOURCE_DIR>/config
+        CC=${CMAKE_C_COMPILER}
         CXX=${CMAKE_CXX_COMPILER}
-        <SOURCE_DIR>/config
+        CFLAGS=${DEPENDENCY_CFLAGS}
+        CPPFLAGS=${DEPENDENCY_CPPFLAGS}
+        LDFLAGS=${DEPENDENCY_LDFLAGS}
+
         --prefix=<INSTALL_DIR>
         --libdir=lib
         no-shared
@@ -44,9 +66,13 @@ ExternalProject_Add(icu
     # so at linking stage `rellocation` errors will occur. To solve this,
     # we can set CC/CXX to CMAKE_C_COMPILER/CMAKE_CXX_COMPILER variables
     # manually which are detected above (by cmake `project()` command)
-    CONFIGURE_COMMAND CC=${CMAKE_C_COMPILER}
+    CONFIGURE_COMMAND <SOURCE_DIR>/source/configure
+        CC=${CMAKE_C_COMPILER}
         CXX=${CMAKE_CXX_COMPILER}
-        <SOURCE_DIR>/source/configure
+        CFLAGS=${DEPENDENCY_CFLAGS}
+        CPPFLAGS=${DEPENDENCY_CPPFLAGS}
+        LDFLAGS=${DEPENDENCY_LDFLAGS}
+
         --with-data-packaging=static
         --prefix=<INSTALL_DIR>
         --disable-shared
@@ -58,7 +84,11 @@ ExternalProject_Add(icu
 #
 ExternalProject_Add(zlib
     URL https://zlib.net/zlib-${ZLIB_VERSION}.tar.gz
-    CONFIGURE_COMMAND CC=${CMAKE_C_COMPILER}
+    CONFIGURE_COMMAND ${CMAKE_COMMAND} -E env
+        CC=${CMAKE_C_COMPILER}
+        CFLAGS=${DEPENDENCY_CFLAGS}
+        CPPFLAGS=${DEPENDENCY_CPPFLAGS}
+        LDFLAGS=${DEPENDENCY_LDFLAGS}
         <SOURCE_DIR>/configure
         --prefix=<INSTALL_DIR>
         --static
@@ -69,13 +99,17 @@ ExternalProject_Add(zlib
 #
 ExternalProject_Add(ncurses
     URL https://ftp.gnu.org/gnu/ncurses/ncurses-${NCURSES_VERSION}.tar.gz
-    CONFIGURE_COMMAND CC=${CMAKE_C_COMPILER}
+    CONFIGURE_COMMAND <SOURCE_DIR>/configure
+        CC=${CMAKE_C_COMPILER}
         CXX=${CMAKE_CXX_COMPILER}
-        <SOURCE_DIR>/configure
+        CFLAGS=${DEPENDENCY_CFLAGS}
+        CPPFLAGS=${DEPENDENCY_CPPFLAGS}
+        LDFLAGS=${DEPENDENCY_LDFLAGS}
+
         --prefix=<INSTALL_DIR>
 
         # This flag enables creation of libcurses.a as a symlink to libncurses.a
-        # and disables subdir creation `ncurses` at  <install_dir>/include. It is
+        # and disables subdir creation `ncurses` at <install_dir>/include. It is
         # necessary for correct work of FindCurses.cmake module (this module is
         # builtin at cmake package) which used in cmake/FindReadline.cmake
         --enable-overwrite
@@ -98,8 +132,12 @@ ExternalProject_Add(ncurses
 #
 ExternalProject_Add(readline
     URL https://ftp.gnu.org/gnu/readline/readline-${READLINE_VERSION}.tar.gz
-    CONFIGURE_COMMAND CC=${CMAKE_C_COMPILER}
-        <SOURCE_DIR>/configure
+    CONFIGURE_COMMAND <SOURCE_DIR>/configure
+        CC=${CMAKE_C_COMPILER}
+        CFLAGS=${DEPENDENCY_CFLAGS}
+        CPPFLAGS=${DEPENDENCY_CFLAGS}
+        LDFLAGS=${DEPENDENCY_LDFLAGS}
+
         --prefix=<INSTALL_DIR>
         --disable-shared
 )
@@ -110,8 +148,12 @@ ExternalProject_Add(readline
 if (APPLE)
     ExternalProject_Add(iconv
         URL https://ftp.gnu.org/pub/gnu/libiconv/libiconv-1.16.tar.gz
-        CONFIGURE_COMMAND CC=${CMAKE_C_COMPILER}
-            <SOURCE_DIR>/configure
+        CONFIGURE_COMMAND <SOURCE_DIR>/configure
+            CC=${CMAKE_C_COMPILER}
+            CFLAGS=${DEPENDENCY_CFLAGS}
+            CPPFLAGS=${DEPENDENCY_CFLAGS}
+            LDFLAGS=${DEPENDENCY_LDFLAGS}
+
             --prefix=<INSTALL_DIR>
             --disable-shared
             --enable-static
@@ -199,9 +241,12 @@ if (APPLE)
 else()
     ExternalProject_Add(unwind
         URL https://download.savannah.nongnu.org/releases/libunwind/libunwind-${UNWIND_VERSION}.tar.gz
-        CONFIGURE_COMMAND CC=${CMAKE_C_COMPILER}
+        CONFIGURE_COMMAND <SOURCE_DIR>/configure
+            CC=${CMAKE_C_COMPILER}
             CXX=${CMAKE_CXX_COMPILER}
-            <SOURCE_DIR>/configure
+            CFLAGS=${DEPENDENCY_CFLAGS}
+            CPPFLAGS=${DEPENDENCY_CFLAGS}
+            LDFLAGS=${DEPENDENCY_LDFLAGS}
             --prefix=<INSTALL_DIR>
             --disable-shared
             --enable-static
