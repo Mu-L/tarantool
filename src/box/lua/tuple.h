@@ -48,6 +48,8 @@ typedef struct tuple_format box_tuple_format_t;
 
 /** \cond public */
 
+struct region;
+
 /**
  * Checks whether the argument idx is a tuple and
  * returns it.
@@ -79,6 +81,24 @@ luaT_pushtuple(struct lua_State *L, box_tuple_t *tuple);
  */
 API_EXPORT box_tuple_t *
 luaT_istuple(struct lua_State *L, int idx);
+
+/**
+ * Encode a Lua table, a tuple or object on the Lua stack as
+ * raw tuple data (MsgPack).
+ *
+ * Set idx to zero to create the new tuple from objects on the Lua
+ * stack.
+ *
+ * If encoding fails, raise an error.
+ *
+ * In case of any other error set a diag and return NULL.
+ *
+ * @sa luaT_tuple_new()
+ * @sa lbox_encode_tuple_on_gc() (internal function)
+ */
+API_EXPORT char *
+luaT_tuple_encode(struct lua_State *L, int idx, size_t *tuple_len_ptr,
+		  struct region *region);
 
 /**
  * Create a new tuple with specific format from a Lua table, a

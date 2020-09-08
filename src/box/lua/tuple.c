@@ -98,8 +98,9 @@ luaT_istuple(struct lua_State *L, int narg)
 	return *(struct tuple **) data;
 }
 
-box_tuple_t *
-luaT_tuple_new(struct lua_State *L, int idx, box_tuple_format_t *format)
+char *
+luaT_tuple_encode(struct lua_State *L, int idx, size_t *tuple_len_ptr,
+		  struct region *region)
 {
 	if (idx != 0 && !lua_istable(L, idx) && !luaT_istuple(L, idx)) {
 		diag_set(IllegalParams, "A tuple or a table expected, got %s",
@@ -107,10 +108,9 @@ luaT_tuple_new(struct lua_State *L, int idx, box_tuple_format_t *format)
 		return NULL;
 	}
 
-	struct ibuf *buf = tarantool_lua_ibuf;
-	ibuf_reset(buf);
+	size_t region_svp = region_used(region);
 	struct mpstream stream;
-	mpstream_init(&stream, buf, ibuf_reserve_cb, ibuf_alloc_cb,
+	mpstream_init(&stream, region, region_reserve_cb, region_alloc_cb,
 		      luamp_error, L);
 	if (idx == 0) {
 		/*
@@ -127,11 +127,28 @@ luaT_tuple_new(struct lua_State *L, int idx, box_tuple_format_t *format)
 		luamp_encode_tuple(L, &tuple_serializer, &stream, idx);
 	}
 	mpstream_flush(&stream);
-	box_tuple_t *tuple = box_tuple_new(format, buf->buf,
-					   buf->buf + ibuf_used(buf));
+	*tuple_len_ptr = region_used(region) - region_svp;
+	return region_join(region, *tuple_len_ptr);
+}
+
+box_tuple_t *
+luaT_tuple_new(struct lua_State *L, int idx, box_tuple_format_t *format)
+{
+	struct region *region = &fiber()->gc;
+	size_t region_svp = region_used(region);
+
+	size_t tuple_len = 0;
+	char *tuple_data = luaT_tuple_encode(L, idx, &tuple_len, region);
+	if (tuple_data == NULL)
+		return NULL;
+
+	box_tuple_t *tuple = box_tuple_new(format, tuple_data,
+					   tuple_data + tuple_len);
+
+	region_truncate(region, region_svp);
 	if (tuple == NULL)
 		return NULL;
-	ibuf_reinit(tarantool_lua_ibuf);
+
 	return tuple;
 }
 
