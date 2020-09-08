@@ -99,7 +99,9 @@ luaT_istuple(struct lua_State *L, int idx);
  *
  * @sa box_tuple_ref()
  *
- * In case of an error set a diag and return NULL.
+ * If encoding fails, raise an error.
+ *
+ * In case of any other error set a diag and return NULL.
  */
 API_EXPORT box_tuple_t *
 luaT_tuple_new(struct lua_State *L, int idx, box_tuple_format_t *format);
