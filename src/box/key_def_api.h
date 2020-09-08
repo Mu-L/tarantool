@@ -231,6 +231,26 @@ box_tuple_compare_with_key(box_tuple_t *tuple_a, const char *key_b,
 API_EXPORT box_key_def_t *
 box_key_def_merge(const box_key_def_t *first, const box_key_def_t *second);
 
+/**
+ * Extract key from tuple by given key definition and return
+ * buffer allocated on fiber region ('fiber gc region') with this
+ * key.
+ *
+ * This function has O(n) complexity, where n is the number of key
+ * parts.
+ *
+ * @param tuple - tuple from which need to extract key
+ * @param key_def - definition of key that need to extract
+ * @param multikey_idx - multikey index hint
+ * @param key_size - here will be size of extracted key
+ *
+ * @retval not NULL Success
+ * @retval NULL     Memory allocation error
+ */
+API_EXPORT char *
+box_tuple_extract_key_ex(box_tuple_t *tuple, box_key_def_t *key_def,
+			 int multikey_idx, uint32_t *key_size_ptr);
+
 /** \endcond public */
 
 /*
