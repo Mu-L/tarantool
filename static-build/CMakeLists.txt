@@ -84,7 +84,7 @@ ExternalProject_Add(icu
 #
 ExternalProject_Add(zlib
     URL https://zlib.net/zlib-${ZLIB_VERSION}.tar.gz
-    CONFIGURE_COMMAND ${CMAKE_COMMAND} -E env
+    CONFIGURE_COMMAND env
         CC=${CMAKE_C_COMPILER}
         CFLAGS=${DEPENDENCY_CFLAGS}
         CPPFLAGS=${DEPENDENCY_CPPFLAGS}

@@ -5,6 +5,30 @@ statically. And builds it.
 
 ## Prerequisites
 
+Please installl following tools and libraries that will
+be necessary for building and testing:
+* git
+* A C/C++ compiler.
+
+  Ordinarily, this is gcc and g++ version 4.6 or later. On Mac OS X, this
+  is Clang version 3.2+.
+
+* cmake
+* autoconf automake libtool
+* make
+* Python and modules.
+
+  Python interpreter is not necessary for building Tarantool itself, unless you
+  intend to use the “Run the test suite". For all platforms, this is python
+  version 2.7+ (but not 3.x). You need the following Python modules:
+  * pyyaml version 3.10
+  * argparse version 1.1
+  * msgpack-python version 0.4.6
+  * gevent version 1.1.2
+  * six version 1.8.0
+
+### Here is an examples for your OS:
+
 CentOS:
 
 ```bash
@@ -13,11 +37,20 @@ yum install -y \
     python-msgpack python-yaml python-argparse python-six python-gevent
 ```
 
+Ubuntu/Debian:
+
+```bash
+apt-get install -y \
+    build-essential cmake make coreutils autoconf automake libtool sed \
+    python python-pip python-setuptools python-dev \
+    python-msgpack python-yaml python-argparse python-six python-gevent
+```
+
 MacOS:
 
 Before you start please install default Xcode Tools by Apple:
 
-```
+```bash
 sudo xcode-select --install
 sudo xcode-select -switch /Applications/Xcode.app/Contents/Developer
 ```
@@ -28,11 +61,11 @@ Install brew using command from
 After that run next script:
 
 ```bash
-  brew install autoconf automake libtool cmake file://$${PWD}/tools/brew_taps/tntpython2.rbs
-  pip install --force-reinstall -r test-run/requirements.txt
+brew install autoconf automake libtool cmake file://$${PWD}/tools/brew_taps/tntpython2.rbs
+pip install --force-reinstall -r test-run/requirements.txt
 ```
 
-### Usage
+## Usage
 
 ```bash
 cmake .
@@ -46,7 +79,7 @@ If you want to customise build, you need to set `CMAKE_TARANTOOL_ARGS` variable
 
 ### Usage
 
-There is three types of `CMAKE_BUILD_TYPE`:
+There are three types of `CMAKE_BUILD_TYPE`:
 * Debug - default
 * Release
 * RelWithDebInfo
