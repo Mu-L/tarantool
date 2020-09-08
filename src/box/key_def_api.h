@@ -179,6 +179,18 @@ box_key_def_dump_parts(const box_key_def_t *key_def, uint32_t *part_count_ptr,
 		       struct region *region);
 
 /**
+ * Check that tuple fields match with given key definition.
+ *
+ * @param key_def Key definition.
+ * @param tuple Tuple to validate.
+ *
+ * @retval 0  The tuple is valid.
+ * @retval -1 The tuple is invalid.
+ */
+API_EXPORT int
+box_tuple_validate_key_parts(box_key_def_t *key_def, box_tuple_t *tuple);
+
+/**
  * Compare tuples using the key definition.
  * @param tuple_a first tuple
  * @param tuple_b second tuple
